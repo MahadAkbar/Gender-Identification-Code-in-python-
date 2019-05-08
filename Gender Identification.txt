@@ -1,0 +1,81 @@
+Importing libraries 
+
+import numpy as np 
+from sklearn.preprocessing import LabelEncoder 
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.svm import SVC 
+from sklearn.linear_model import LogisticRegression 
+from sklearn.naive_bayes import BernoulliNB 
+from sklearn.metrics import accuracy_score 
+import pandas as pd 
+
+Reading Collected Data 
+
+train_data = pd.read_csv(r"F:\Semester 6\Machine Learning\train.csv") 
+test_data = pd.read_csv(r"F:\Semester 6\Machine Learning\test.csv") 
+
+Converting into continuous values 
+
+le = LabelEncoder() 
+categorical_feature_mask = train_data.dtypes==object 
+categorical_cols = train_data.columns[categorical_feature_mask].tolist() 
+train_data[categorical_cols] = train_data[categorical_cols].apply(lambda col: le.fit_transform(col)) 
+X_train = train_data.iloc[: , 0:5] 
+Y_train = train_data.iloc[: , 5:] 
+
+Phase 1 : Training 
+
+rfc_clf = RandomForestClassifier() 
+rfc_clf.fit(X_train,Y_train) 
+l_clf = LogisticRegression() 
+l_clf.fit(X_train,Y_train) 
+s_clf = SVC() 
+s_clf.fit(X_train,Y_train) 
+ber_clf = BernoulliNB() 
+ber_clf.fit(X_train , Y_train) 
+
+Phase 2  :  Testing 
+
+rfc_prediction = rfc_clf.predict(X_test) 
+print (rfc_prediction) 
+l_prediction = l_clf.predict(X_test) 
+print(l_prediction) 
+s_prediction = s_clf.predict(X_test) 
+print (s_prediction) 
+ber_prediction = ber_clf.predict(X_test) 
+print (ber_prediction) 
+
+Scoring Accuracy 
+
+ber_acc = accuracy_score(ber_prediction,Y_test) 
+rfc_acc = accuracy_score(rfc_prediction,Y_test) 
+l_acc = accuracy_score(l_prediction,Y_test) 
+s_acc = accuracy_score(s_prediction,Y_test) 
+classifiers = ['BernoulliNB', 'Random Forest', 'Logistic Regression' , 'SVC'] 
+accuracy = np.array([ber_acc, rfc_acc, l_acc, s_acc]) 
+max_acc = np.argmax(accuracy) 
+print(classifiers[max_acc] + ' is the best classifier for this problem') 
+
+Phase 3 : Application Phase 
+
+data = pd.concat([train,test],axis=0,join="outer") 
+ X_data = data.iloc[: , 0:5] 
+  Y_data = data.iloc[: , 5:] 
+ber_clf.fit(X_data,Y_data) 
+height = input("Enter the height = ") 
+weight = input("Enter weight  = ") 
+hair = input("Enter the hair size (Long / short / medium / bald) = " ) 
+beard = input("Enter the beard (Yes / NO) = ") 
+scarf = input("Enter the scarf (Yes / No) = ") 
+unseen_data =  { 'Height' : [height] , 'Weight' : [weight] , 'Hair' : [hair] , 'Beard' : [beard] ,'Scarf' : [scarf]} 
+df = pd.DataFrame(unseen_data) 
+status_hair = {"Bald":0 ,"Long":1 , "Medium" : 2 , "Short" : 3} 
+df["Hair"] = df.Hair.map(status_hair) 
+status_beard = {"Yes":1 ,"No":0} 
+df["Beard"] = df.Beard.map(status_beard) status_scarf = {"Yes":1 ,"No":0} 
+df["Scarf"] = df.Scarf.map(status_scarf) 
+ber_prediction = ber_clf.predict(df) 
+if ber_prediction == 1: 
+    print ("male") 
+else : 
+    print ("female") 
